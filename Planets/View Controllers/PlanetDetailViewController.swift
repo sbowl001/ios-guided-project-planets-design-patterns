@@ -36,3 +36,31 @@ class PlanetDetailViewController: UIViewController {
         label.text = planet.name
     }
 }
+
+extension PlanetDetailViewController {
+    override func encodeRestorableState(with coder: NSCoder) {
+        defer {super.encodeRestorableState(with: coder)}
+        
+        //PLanet - >Data -> Encode in coder
+        
+        var planetData: Data?
+        
+        do {
+            planetData = try PropertyListEncoder().encode(planet)
+        } catch {
+            NSLog("error encoding planet: \(error)")
+        }
+        guard let planet = planetData else {return}
+        coder.encode(planet, forKey: "planetData")
+    }
+    
+    override func decodeRestorableState(with coder: NSCoder) {
+        defer {super.decodeRestorableState(with: coder)}
+        
+        //Data -> Planet -> put in var planet
+        
+        guard let planetData = coder.decodeObject(forKey: "planetData") as? Data else {return}
+        
+        self.planet = try? PropertyListDecoder().decode(Planet.self, from: planetData)
+    }
+}
